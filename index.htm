@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>역대 당첨 번호 기반 로또 추천기</title>
+<style>
+  body {
+    font-family: 'Nanum Gothic', sans-serif;
+    margin: 20px;
+    background: #f0f0f0;
+    color: #333;
+    text-align: center;
+  }
+  h1 {
+    margin-bottom: 15px;
+  }
+  #numberContainer {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    max-width: 360px;
+    margin: 0 auto 20px auto;
+  }
+  .number {
+    width: 48px;
+    height: 48px;
+    border-radius: 24px;
+    margin: 5px;
+    font-size: 20px;
+    color: white;
+    font-weight: 700;
+    line-height: 48px;
+    user-select: none;
+  }
+  .red { background-color: #f44336; }
+  .orange { background-color: #ff9800; }
+  .yellow { background-color: #ffeb3b; color: #444; }
+  .green { background-color: #4caf50; }
+  .blue { background-color: #2196f3; }
+  .purple { background-color: #9c27b0; }
+  button {
+    background-color: #2196f3;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  button:active {
+    background-color: #0b7dda;
+  }
+  @media (max-width: 400px) {
+    #numberContainer {
+      max-width: 280px;
+    }
+    .number {
+      width: 40px;
+      height: 40px;
+      font-size: 18px;
+      border-radius: 20px;
+      line-height: 40px;
+    }
+    button {
+      width: 90%;
+      font-size: 18px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<h1>역대 당첨 번호 기반<br>로또 번호 추천기</h1>
+
+<div id="numberContainer" aria-live="polite" aria-atomic="true" aria-relevant="all">번호를 생성하려면 버튼을 누르세요</div>
+<button id="generateBtn">번호 추천받기</button>
+
+<script>
+// 역대 1등 당첨 번호가 많이 나온 빈도 예시 (1~45)
+// 실제 통계 데이터 기반으로 가중치 부여한 예 (가중치 값은 임의 조정 가능)
+const weightedNumbers = [
+  [1, 15], [2, 13], [3, 10], [4, 8], [5, 20],
+  [6, 10], [7, 9], [8, 12], [9, 13], [10, 14],
+  [11, 11], [12, 7], [13, 16], [14, 10], [15, 9],
+  [16, 8], [17, 14], [18, 15], [19, 12], [20, 10],
+  [21, 6], [22, 5], [23, 18], [24, 20], [25, 7],
+  [26, 8], [27, 6], [28, 9], [29, 10], [30, 6],
+  [31, 5], [32, 7], [33, 8], [34, 12], [35, 10],
+  [36, 7], [37, 6], [38, 5], [39, 9], [40, 8],
+  [41, 7], [42, 10], [43, 9], [44, 6], [45, 5]
+];
+
+// 번호별 색상 구간 지정
+function getColor(num) {
+  if(num <= 10) return 'red';
+  if(num <= 20) return 'orange';
+  if(num <= 30) return 'yellow';
+  if(num <= 40) return 'green';
+  return 'blue';
+}
+
+// 가중치 기반 랜덤 선택 함수
+function weightedRandom() {
+  let weightSum = weightedNumbers.reduce((acc, val) => acc + val[1], 0);
+  let rnd = Math.random() * weightSum;
+  let cumulative = 0;
+  for (const [num, weight] of weightedNumbers) {
+    cumulative += weight;
+    if (rnd <= cumulative) return num;
+  }
+  return weightedNumbers[weightedNumbers.length - 1][0];
+}
+
+// 로또 번호 6개 생성 (중복 제거)
+function generateLottoNumbers() {
+  const selected = new Set();
+  while (selected.size < 6) {
+    selected.add(weightedRandom());
+  }
+  return Array.from(selected).sort((a,b) => a - b);
+}
+
+// UI 업데이트 함수
+function displayNumbers(numbers) {
+  const container = document.getElementById('numberContainer');
+  container.innerHTML = '';
+  numbers.forEach(num => {
+    const div = document.createElement('div');
+    div.textContent = num;
+    div.className = 'number ' + getColor(num);
+    container.appendChild(div);
+  });
+}
+
+document.getElementById('generateBtn').addEventListener('click', () => {
+  const numbers = generateLottoNumbers();
+  displayNumbers(numbers);
+});
+</script>
+
+</body>
+</html>
